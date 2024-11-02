@@ -10,6 +10,7 @@ services:
       - "5437:5432"
     networks:
       - mc_network
+
   web-visits:
     build: .
     command: python src/manage.py runserver 0.0.0.0:8600
@@ -21,6 +22,42 @@ services:
       - mc_network
     depends_on:
       - db-visits
+      - redis
+      - celery-worker
+      - celery-beat
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - mc_network
+
+  celery-worker:
+    build: .
+    command: celery -A src.core worker --loglevel=info
+    depends_on:
+      - redis
+    volumes:
+      - ./src:/app/src
+    environment:
+      - PYTHONPATH=/app/src
+      - DJANGO_SETTINGS_MODULE=src.core.settings
+    networks:
+      - mc_network
+
+  celery-beat:
+    build: .
+    command: celery -A src.core beat --loglevel=debug
+    depends_on:
+      - redis
+    volumes:
+      - ./src:/app/src
+    environment:
+      - PYTHONPATH=/app/src
+      - DJANGO_SETTINGS_MODULE=src.core.settings
+    networks:
+      - mc_network
 networks:
   mc_network:
     external: true
