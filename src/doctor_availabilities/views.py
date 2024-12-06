@@ -32,6 +32,7 @@ class DoctorAvailabilityView(GenericViewSet, UpdateModelMixin, ListModelMixin, R
         serializer.is_valid(raise_exception=True)
 
         current_user_role = self.request.headers.get('role')
+
         token = self.request.headers.get('Authorization')
         accounts_service_url = 'http://web-accounts:8100/users/'
 
@@ -40,15 +41,13 @@ class DoctorAvailabilityView(GenericViewSet, UpdateModelMixin, ListModelMixin, R
         }
 
         doctor_id = self.request.data.get('doctor_id')
-        print(doctor_id)
         doctor_url = f'{accounts_service_url}{doctor_id}/'
 
         doctor_response = requests.get(doctor_url, headers=headers)
 
         if doctor_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Doctor not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        if current_user_role != 'Doctor':
+        elif current_user_role != 'Doctor':
             return Response({'message': 'Only doctors can create this.'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer.save()

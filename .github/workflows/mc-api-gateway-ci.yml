@@ -1,4 +1,4 @@
-name: API Gateway CI
+name: API Visits CI
 
 on:
   push:

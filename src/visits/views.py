@@ -31,27 +31,25 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        token = self.request.headers.get('Authorization')  # Pobieramy token z nagłówka
+        token = self.request.headers.get('Authorization')
         accounts_service_url = 'http://web-accounts:8100/users/'
+
+        headers = {
+            'Authorization': token
+        }
 
         patient_id = self.request.data.get('patient_id')
         patient_url = f'{accounts_service_url}{patient_id}/'
 
-        # Dodajemy token do nagłówków
-        headers = {
-            'Authorization': token  # Dodajemy token JWT do nagłówka
-        }
+        patient_response = requests.get(patient_url, headers=headers)
 
-        patient_response = requests.get(patient_url, headers=headers)  # Przesyłamy token w zapytaniu
-        print(f'Patient response status: {patient_response.status_code}, body: {patient_response.text}')
-
-        if patient_response == status.HTTP_404_NOT_FOUND:
+        if patient_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Patient not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         doctor_id = self.request.data.get('doctor_id')
         doctor_url = f'{accounts_service_url}{doctor_id}/'
 
-        doctor_response = requests.get(doctor_url, headers=headers)  # Przesyłamy token w zapytaniu
+        doctor_response = requests.get(doctor_url, headers=headers)
 
         if doctor_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Doctor not found.'}, status=status.HTTP_404_NOT_FOUND)
