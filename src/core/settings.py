@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_extensions',
+    'drf_spectacular',
 ]
 
 INSTALLED_EXTENSION = [
@@ -50,6 +51,10 @@ INSTALLED_EXTENSION = [
 ]
 
 INSTALLED_APPS += INSTALLED_EXTENSION
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -137,7 +142,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-# CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BROKER_URL = 'redis://redis:6379/0'  # Lub inne odpowiednie ustawienie dla brokera
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
