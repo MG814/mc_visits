@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 
 from doctor_availabilities.models import DoctorAvailability
 from doctor_availabilities.serializers import DoctorAvailabilitySerializer
+from core.settings import HTTP_URL
 
 
 class DoctorAvailabilityView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelMixin):
@@ -34,7 +35,7 @@ class DoctorAvailabilityView(GenericViewSet, UpdateModelMixin, ListModelMixin, R
         current_user_role = self.request.headers.get('role')
 
         token = self.request.headers.get('Authorization')
-        accounts_service_url = 'http://web-accounts:8100/users/'
+        accounts_service_url = f'{HTTP_URL}/users/'
 
         headers = {
             'Authorization': token

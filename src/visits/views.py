@@ -8,6 +8,7 @@ import requests
 
 from .models import Visit
 from .serializers import VisitSerializer
+from core.settings import HTTP_URL
 
 
 class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelMixin):
@@ -27,21 +28,34 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(methods=['GET'], detail=False, url_path='doctor/(?P<doctor_id>\d+)')
+    def get_doctor_visits(self, request, doctor_id=None):
+        queryset = self.get_queryset().filter(doctor_id=doctor_id)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        start_date = request.query_params.get('start_date')
+        stop_date = request.query_params.get('stop_date')
+
+        if start_date and stop_date:
+            queryset = queryset.filter(date__range=(start_date, stop_date))
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        token = self.request.headers.get('Authorization')
-        accounts_service_url = 'http://web-accounts:8100/users/'
-
-        headers = {
-            'Authorization': token
-        }
+        accounts_service_url = f'{HTTP_URL}/users/'
 
         patient_id = self.request.data.get('patient_id')
         patient_url = f'{accounts_service_url}{patient_id}/'
 
-        patient_response = requests.get(patient_url, headers=headers)
+        patient_response = requests.get(patient_url)
 
         if patient_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Patient not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -49,7 +63,7 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         doctor_id = self.request.data.get('doctor_id')
         doctor_url = f'{accounts_service_url}{doctor_id}/'
 
-        doctor_response = requests.get(doctor_url, headers=headers)
+        doctor_response = requests.get(doctor_url)
 
         if doctor_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Doctor not found.'}, status=status.HTTP_404_NOT_FOUND)
