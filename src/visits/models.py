@@ -28,4 +28,6 @@ class Visit(SoftDelete):
     doctor_id = models.IntegerField()
     date = models.DateTimeField()
     title = models.CharField(max_length=50)
+    patient_email = models.EmailField()
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     is_paid = models.BooleanField(default=False)
