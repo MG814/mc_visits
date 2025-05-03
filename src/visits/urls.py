@@ -5,7 +5,4 @@ from .views import VisitView
 router = routers.SimpleRouter()
 router.register('visits', VisitView, basename='visit')
 
-
-urlpatterns = [
-]
-urlpatterns += router.urls
+urlpatterns = router.urls

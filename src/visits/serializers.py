@@ -6,4 +6,4 @@ class VisitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Visit
-        fields = ['id', 'patient_id', 'doctor_id', 'date', 'title', 'is_paid']
+        fields = ['id', 'patient_id', 'doctor_id', 'date', 'title', 'patient_email', 'price', 'is_paid']
