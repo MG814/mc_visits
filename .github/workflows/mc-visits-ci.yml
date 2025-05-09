@@ -41,10 +41,11 @@ jobs:
         poetry install
       env:
         POETRY_VIRTUALENVS_CREATE: false
+    - name: Run migrations
+      run: python manage.py migrate
     - name: Run Tests
       run: |
         cd src
-        python manage.py migrate
         coverage run manage.py test
         coverage report
         coverage xml
