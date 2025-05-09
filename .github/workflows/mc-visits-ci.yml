@@ -9,6 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DB_NAME: ${{ vars.DB_NAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_USER: ${{ vars.DB_USER }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_HOST: ${{ vars.DB_HOST }}
     strategy:
       max-parallel: 4
       matrix:
@@ -51,12 +57,6 @@ jobs:
         coverage run manage.py test
         coverage report
         coverage xml
-      env:
-        DB_NAME: ${{ vars.DB_NAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_USER: ${{ vars.DB_USER }}
-        DB_PORT: ${{ vars.DB_PORT }}
-        DB_HOST: ${{ vars.DB_HOST }}
     - name: Upload coverage report
       uses: codecov/codecov-action@v4
       env:
