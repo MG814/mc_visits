@@ -27,6 +27,7 @@ requests = "2.32.3"
 ruff = "^0.9.1"
 safety = "^3.2.14"
 drf-spectacular = "^0.28.0"
+responses = "^0.25.7"
 
 
 [build-system]
