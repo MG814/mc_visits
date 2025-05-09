@@ -42,7 +42,7 @@ jobs:
       env:
         POETRY_VIRTUALENVS_CREATE: false
     - name: Run migrations
-      run:
+      run: |
         cd src
         python manage.py migrate
     - name: Run Tests
