@@ -5,14 +5,10 @@ from django.utils import timezone
 from core import settings
 from django.utils.timezone import localtime
 from visits.models import Visit
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 @shared_task
 def send_visit_notification():
-    logger.debug('rozpoczeto zadanie')
     tomorrow = timezone.now() + timedelta(days=1)
     visits = Visit.objects.filter(date__date=tomorrow.date())
 
