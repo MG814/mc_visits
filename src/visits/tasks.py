@@ -23,7 +23,7 @@ def send_visit_notification():
         send_mail(
             'Przypomnienie o wizycie',
             f'Masz zaplanowaną wizytę na {local_dt.date()}, godzina {local_dt.time().strftime("%H:%M")}',
-            settings.DEFAULT_EMAIL,
+            settings.EMAIL_HOST_USER,
             [patient_email],
             fail_silently=False,
         )
