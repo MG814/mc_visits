@@ -12,10 +12,16 @@ services:
       - "5437:5432"
     networks:
       - mc_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   web-visits:
     build: .
-    command: python src/manage.py runserver 0.0.0.0:8600
+    command: /app/start.sh
     volumes:
       - ./src:/app/src
     ports:
@@ -25,10 +31,14 @@ services:
     networks:
       - mc_network
     depends_on:
-      - db-visits
-      - redis
-      - celery-worker
-      - celery-beat
+      db-visits:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery-worker:
+        condition: service_started
+      celery-beat:
+        condition: service_started
 
   redis:
     image: "redis:alpine"
