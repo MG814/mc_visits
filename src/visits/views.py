@@ -52,7 +52,7 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         patient_id = self.request.data.get('patient_id')
         patient_url = f'{accounts_service_url}{patient_id}/'
 
-        patient_response = requests.get(patient_url)
+        patient_response = requests.get(patient_url, timeout=10)
 
         if patient_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Patient not found.'}, status=status.HTTP_404_NOT_FOUND)
@@ -60,7 +60,7 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         doctor_id = self.request.data.get('doctor_id')
         doctor_url = f'{accounts_service_url}{doctor_id}/'
 
-        doctor_response = requests.get(doctor_url)
+        doctor_response = requests.get(doctor_url, timeout=10)
 
         if doctor_response.status_code == status.HTTP_404_NOT_FOUND:
             return Response({'message': 'Doctor not found.'}, status=status.HTTP_404_NOT_FOUND)
