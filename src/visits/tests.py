@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -18,6 +20,8 @@ class TestVisitsView(APITestCase):
             "patient_id": 11,
             "doctor_id": 2,
             "date": "2024-12-01T11:00:00+01:00",
+            "patient_email": "test@example.com",
+            "price": Decimal(100),
             "title": "Wizyta kontrolna"
         }
         self.visit = VisitFactory(patient_id=1, doctor_id=2)

@@ -6,25 +6,39 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    env_file:
+      - /src/.env
     ports:
       - "5437:5432"
     networks:
       - mc_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   web-visits:
     build: .
-    command: python src/manage.py runserver 0.0.0.0:8600
+    command: /app/start.sh
     volumes:
       - ./src:/app/src
     ports:
       - "8600:8600"
+    env_file:
+      - /src/.env
     networks:
       - mc_network
     depends_on:
-      - db-visits
-      - redis
-      - celery-worker
-      - celery-beat
+      db-visits:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      celery-worker:
+        condition: service_started
+      celery-beat:
+        condition: service_started
 
   redis:
     image: "redis:alpine"
@@ -40,6 +54,8 @@ services:
       - redis
     volumes:
       - ./src:/app/src
+    env_file:
+      - /src/.env
     environment:
       - PYTHONPATH=/app/src
       - DJANGO_SETTINGS_MODULE=src.core.settings
@@ -53,6 +69,8 @@ services:
       - redis
     volumes:
       - ./src:/app/src
+    env_file:
+      - /src/.env
     environment:
       - PYTHONPATH=/app/src
       - DJANGO_SETTINGS_MODULE=src.core.settings
