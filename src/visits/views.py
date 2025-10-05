@@ -16,10 +16,8 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
     permission_classes = [AllowAny]
     queryset = Visit.objects.all()
 
-    @action(methods=['GET'], detail=False, url_path='patient/(?P<patient_id>\d+)')
-    def get_patient_visits(self, request, patient_id=None):
-        queryset = self.get_queryset().filter(patient_id=patient_id)
-
+    def _list_visits(self, queryset):
+        """Helper method for listing and paginating visits"""
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -28,14 +26,14 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(methods=['GET'], detail=False, url_path='patient/(?P<patient_id>\d+)')
+    def get_patient_visits(self, request, patient_id=None):
+        queryset = self.get_queryset().filter(patient_id=patient_id)
+        return Response(self._list_visits(queryset))
+
     @action(methods=['GET'], detail=False, url_path='doctor/(?P<doctor_id>\d+)')
     def get_doctor_visits(self, request, doctor_id=None):
         queryset = self.get_queryset().filter(doctor_id=doctor_id)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
         start_date = request.query_params.get('start_date')
         stop_date = request.query_params.get('stop_date')
@@ -43,8 +41,7 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
         if start_date and stop_date:
             queryset = queryset.filter(date__range=(start_date, stop_date))
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(self._list_visits(queryset))
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -81,7 +78,7 @@ class VisitView(GenericViewSet, UpdateModelMixin, ListModelMixin, RetrieveModelM
 
         visit = Visit.everything.get(id=visit_id)
         if visit.is_deleted:
-            return Response({'message': 'That visit was deleted.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'message': 'That visit was deleted.'}, status=status.HTTP_404_NOT_FOUND)
 
         visit.soft_deleted()
 
